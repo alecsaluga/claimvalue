@@ -19,11 +19,8 @@ export async function submitToWebhook(
   }
 
   try {
-    console.log("[API] Submitting to webhook:", WEBHOOK_URL);
-    console.log("[API] Payload:", JSON.stringify(payload, null, 2));
-
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
 
     const response = await fetch(WEBHOOK_URL, {
       method: "POST",
@@ -36,25 +33,18 @@ export async function submitToWebhook(
 
     clearTimeout(timeoutId);
 
-    console.log("[API] Response status:", response.status);
-
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("[API] Webhook error response:", errorText);
-      throw new Error(`Webhook responded with ${response.status}: ${errorText}`);
+      throw new Error(`Webhook responded with ${response.status}`);
     }
 
     const data = await response.json();
-    console.log("[API] Raw response data:", JSON.stringify(data, null, 2));
 
     // Handle OpenAI API response format (array with message.content)
     let parsedData = data;
     if (Array.isArray(data) && data[0]?.message?.content) {
-      console.log("[API] Detected OpenAI format, extracting content");
       const messageContent = data[0].message.content;
       // Check if content is already an object or needs parsing
       parsedData = typeof messageContent === 'string' ? JSON.parse(messageContent) : messageContent;
-      console.log("[API] Parsed OpenAI content:", JSON.stringify(parsedData, null, 2));
     }
 
     trackEvent("received_estimate", { sessionId: payload.sessionId });
@@ -202,28 +192,27 @@ function getMockEstimate(payload: SubmissionPayload): EstimateResponse {
   explanationText += `Cases like this in your compensation range typically settle between ${new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0 }).format(lowEstimate)} and ${new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0 }).format(highEstimate)}, though outcomes vary based on specific facts and jurisdiction.`;
 
   return {
-    caseTier: confidenceLevel === "high" ? "A" : confidenceLevel === "medium" ? "B" : "C",
-    settlementRange: {
+    estimated_value_range: {
       low: lowEstimate,
       high: highEstimate,
       currency: "USD",
     },
-    confidence: {
-      label: confidenceLevel.charAt(0).toUpperCase() + confidenceLevel.slice(1),
-      score: confidenceLevel === "high" ? 0.8 : confidenceLevel === "medium" ? 0.5 : 0.3,
-    },
-    clientSummary: explanationText,
-    reasons: [
+    likelihood_band: likelihoodBand,
+    confidence_level: confidenceLevel,
+    explanation_text: explanationText,
+    drivers: [
       "Temporal proximity between protected activity and adverse action",
       "Quality and quantity of documentary evidence",
       "Annual compensation and income impact",
       "Employer size and resources",
       "State-specific employment law protections",
     ],
-    missingInfo: [
-      !hasStrongEvidence ? "Additional documentation would strengthen the case" : null,
-      "Detailed timeline of events with specific dates",
-      "Copies of relevant emails, HR complaints, and performance reviews",
+    risks: [
+      !hasStrongEvidence ? "Limited documentation could weaken claim" : null,
+      timing === "Not sure" ? "Unclear timeline may affect causation analysis" : null,
+      employerSize === "Under 10" ? "Smaller employers may have different legal obligations" : null,
+      "Statute of limitations varies by claim type and jurisdiction",
+      "Outcomes depend heavily on specific facts and evidence quality",
     ].filter((r): r is string => r !== null),
     nextSteps: [
       "Preserve all evidence immediately (emails, texts, documents)",
@@ -232,6 +221,5 @@ function getMockEstimate(payload: SubmissionPayload): EstimateResponse {
       "Avoid discussing the situation on social media",
       "Research your state's statute of limitations for employment claims",
     ],
-    disclaimer: "This is an informational estimate based on common patterns in workplace disputes, not legal advice. Outcomes and values vary widely by facts, documentation, and timing, and this does not determine eligibility or predict results.",
   };
 }

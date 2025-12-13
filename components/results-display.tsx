@@ -66,20 +66,20 @@ export function ResultsDisplay({ estimate }: ResultsDisplayProps) {
             <Separator />
 
             {/* CTA Section */}
-            <div className="text-center space-y-4 py-4">
-              <h2 className="text-2xl md:text-3xl font-bold">
+            <div className="text-center space-y-4 py-4 px-4">
+              <h2 className="text-xl md:text-3xl font-bold">
                 Want to have it reviewed by a real attorney?
               </h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
                 No obligation — We have a network of highly qualified attorneys in your area who have collected millions in settlements for their clients.
               </p>
               <Button
                 size="lg"
-                className="gap-2 px-8"
+                className="gap-2 px-6 md:px-8 w-full md:w-auto text-sm md:text-base"
                 onClick={() => setShowContactModal(true)}
               >
                 Click for a no-obligation review
-                <ArrowRight className="h-5 w-5" />
+                <ArrowRight className="h-4 w-4 md:h-5 md:w-5" />
               </Button>
             </div>
 
