@@ -200,9 +200,12 @@ export function Quiz() {
       <Card className="w-full max-w-2xl mx-auto shadow-lg">
         <CardContent className="p-12 text-center">
           <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
-          <h3 className="text-xl font-semibold mb-2">Analyzing similar workplace situations…</h3>
-          <p className="text-muted-foreground">
-            Please wait while we generate your personalized estimate...
+          <h3 className="text-xl font-semibold mb-2">Analyzing your case...</h3>
+          <p className="text-muted-foreground mb-2">
+            Our AI is reviewing thousands of similar cases to provide you with an accurate estimate.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            This may take up to 30 seconds...
           </p>
         </CardContent>
       </Card>
