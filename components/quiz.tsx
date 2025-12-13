@@ -62,7 +62,7 @@ export function Quiz() {
     if (currentQuestion.required) {
       // Special validation for dynamic_details
       if (currentQuestion.type === "dynamic_details") {
-        const detailsValue = typeof currentValue === 'object' && !Array.isArray(currentValue) ? currentValue : {};
+        const detailsValue = typeof currentValue === 'object' && !Array.isArray(currentValue) ? currentValue as Record<string, any> : {};
         const savedAnswers = loadAnswers();
         const selectedCauses = savedAnswers.what_caused;
 
@@ -436,7 +436,7 @@ function DynamicDetailsInput({ question, value, onChange, error }: DynamicDetail
   }, []);
 
   // Initialize value structure if needed
-  const detailsValue = typeof value === 'object' && !Array.isArray(value) ? value : {};
+  const detailsValue = typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {};
 
   const updateDetail = (cause: string, field: 'example' | 'when' | 'evidence', fieldValue: any) => {
     const updated = {
@@ -534,7 +534,7 @@ function DynamicDetailsInput({ question, value, onChange, error }: DynamicDetail
                       onClick={() => {
                         const currentEvidence = Array.isArray(causeData.evidence) ? causeData.evidence : [];
                         const newEvidence = isSelected
-                          ? currentEvidence.filter(e => e !== evidenceOption)
+                          ? currentEvidence.filter((e: string) => e !== evidenceOption)
                           : [...currentEvidence, evidenceOption];
                         updateDetail(cause, 'evidence', newEvidence);
                       }}
