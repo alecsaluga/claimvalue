@@ -61,14 +61,7 @@ export async function submitToWebhook(
 
     return parsedData as EstimateResponse;
   } catch (error) {
-    if (error instanceof Error && error.name === "AbortError") {
-      console.log("[API] Webhook timeout, falling back to mock");
-      trackEvent("error_occurred", {
-        error: "webhook_timeout",
-        sessionId: payload.sessionId,
-      });
-      return getMockEstimate(payload);
-    }
+    console.error("[API] Webhook submission failed:", error);
 
     trackEvent("error_occurred", {
       error: error instanceof Error ? error.message : "unknown",
