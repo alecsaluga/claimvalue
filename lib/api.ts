@@ -10,6 +10,10 @@ const CONNECT_WEBHOOK_URL = process.env.NEXT_PUBLIC_CONNECT_WEBHOOK_URL;
 export async function submitToWebhook(
   payload: SubmissionPayload
 ): Promise<EstimateResponse> {
+  console.log("[API] submitToWebhook called");
+  console.log("[API] WEBHOOK_URL value:", WEBHOOK_URL);
+  console.log("[API] WEBHOOK_URL type:", typeof WEBHOOK_URL);
+
   trackEvent("submitted", { sessionId: payload.sessionId });
 
   // If no webhook URL is configured, use mock response
@@ -45,28 +49,45 @@ export async function submitToWebhook(
     }
 
     const data = await response.json();
-    console.log("[API] Raw response data:", JSON.stringify(data, null, 2));
+    console.log("[API] Raw response data:", data);
 
-    // Handle OpenAI API response format (array with choices[0].message.content)
+    // Handle OpenAI API response format
     let parsedData = data;
-    if (Array.isArray(data) && data[0]?.choices?.[0]?.message?.content) {
-      console.log("[API] Detected OpenAI chat completion format");
-      const messageContent = data[0].choices[0].message.content;
-      // Content is already an object in this format
+
+    // Direct chat completion object (not in array)
+    if (data?.choices?.[0]?.message?.content) {
+      console.log("[API] Detected OpenAI chat completion format (direct object)");
+      const messageContent = data.choices[0].message.content;
+      console.log("[API] Message content type:", typeof messageContent);
+      console.log("[API] Message content:", messageContent);
       parsedData = typeof messageContent === 'string' ? JSON.parse(messageContent) : messageContent;
-      console.log("[API] Extracted content:", JSON.stringify(parsedData, null, 2));
+      console.log("[API] Extracted content:", parsedData);
     }
-    // Legacy format support
+    // Array format
+    else if (Array.isArray(data) && data[0]?.choices?.[0]?.message?.content) {
+      console.log("[API] Detected OpenAI chat completion format (array)");
+      const messageContent = data[0].choices[0].message.content;
+      parsedData = typeof messageContent === 'string' ? JSON.parse(messageContent) : messageContent;
+      console.log("[API] Extracted content:", parsedData);
+    }
+    // Legacy format
     else if (Array.isArray(data) && data[0]?.message?.content) {
       console.log("[API] Detected legacy OpenAI format");
       const messageContent = data[0].message.content;
       parsedData = typeof messageContent === 'string' ? JSON.parse(messageContent) : messageContent;
-      console.log("[API] Extracted content:", JSON.stringify(parsedData, null, 2));
+      console.log("[API] Extracted content:", parsedData);
+    } else {
+      console.log("[API] Using response as-is (not OpenAI format)");
     }
+
+    console.log("[API] Final parsedData:", parsedData);
+    console.log("[API] Has settlementRange?", !!parsedData?.settlementRange);
 
     // Validate response has required fields
     if (!parsedData?.settlementRange) {
-      console.error("[API] Invalid response format - missing settlementRange:", parsedData);
+      console.error("[API] Invalid response format - missing settlementRange");
+      console.error("[API] parsedData object:", parsedData);
+      console.error("[API] parsedData keys:", Object.keys(parsedData || {}));
       throw new Error("Invalid response from webhook - missing settlement range");
     }
 
