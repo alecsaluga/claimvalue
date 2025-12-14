@@ -57,6 +57,12 @@ export async function submitToWebhook(
       console.log("[API] Parsed OpenAI content:", JSON.stringify(parsedData, null, 2));
     }
 
+    // Validate response has required fields
+    if (!parsedData?.settlementRange?.low || !parsedData?.settlementRange?.high) {
+      console.error("[API] Invalid response format - missing settlementRange:", parsedData);
+      throw new Error("Invalid response from webhook - missing settlement range");
+    }
+
     trackEvent("received_estimate", { sessionId: payload.sessionId });
 
     return parsedData as EstimateResponse;
