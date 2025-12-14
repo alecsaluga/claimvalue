@@ -47,18 +47,25 @@ export async function submitToWebhook(
     const data = await response.json();
     console.log("[API] Raw response data:", JSON.stringify(data, null, 2));
 
-    // Handle OpenAI API response format (array with message.content)
+    // Handle OpenAI API response format (array with choices[0].message.content)
     let parsedData = data;
-    if (Array.isArray(data) && data[0]?.message?.content) {
-      console.log("[API] Detected OpenAI format, extracting content");
-      const messageContent = data[0].message.content;
-      // Check if content is already an object or needs parsing
+    if (Array.isArray(data) && data[0]?.choices?.[0]?.message?.content) {
+      console.log("[API] Detected OpenAI chat completion format");
+      const messageContent = data[0].choices[0].message.content;
+      // Content is already an object in this format
       parsedData = typeof messageContent === 'string' ? JSON.parse(messageContent) : messageContent;
-      console.log("[API] Parsed OpenAI content:", JSON.stringify(parsedData, null, 2));
+      console.log("[API] Extracted content:", JSON.stringify(parsedData, null, 2));
+    }
+    // Legacy format support
+    else if (Array.isArray(data) && data[0]?.message?.content) {
+      console.log("[API] Detected legacy OpenAI format");
+      const messageContent = data[0].message.content;
+      parsedData = typeof messageContent === 'string' ? JSON.parse(messageContent) : messageContent;
+      console.log("[API] Extracted content:", JSON.stringify(parsedData, null, 2));
     }
 
     // Validate response has required fields
-    if (!parsedData?.settlementRange?.low || !parsedData?.settlementRange?.high) {
+    if (!parsedData?.settlementRange) {
       console.error("[API] Invalid response format - missing settlementRange:", parsedData);
       throw new Error("Invalid response from webhook - missing settlement range");
     }
