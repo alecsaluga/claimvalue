@@ -50,6 +50,24 @@ export default function Home() {
           <p className="text-base md:text-lg text-muted-foreground max-w-3xl mx-auto font-[400]">
             Our estimator analyzes your case details and provides a personalized estimate based on thousands of similar cases.
           </p>
+
+          {/* Attorney Review Badge */}
+          <div className="mt-6 mb-4 max-w-2xl mx-auto">
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-2xl p-6 shadow-sm">
+              <div className="flex items-center justify-center gap-3 mb-2">
+                <div className="text-3xl">⚖️</div>
+                <h3 className="text-xl md:text-2xl font-bold text-gray-900">
+                  Get Your Case Reviewed by an Attorney
+                </h3>
+              </div>
+              <p className="text-base text-gray-700 leading-relaxed mb-3">
+                After receiving your estimate, you can <span className="font-semibold text-blue-700">optionally</span> connect with a qualified attorney who can take your case—completely free to explore, with no obligation.
+              </p>
+              <p className="text-sm text-gray-600 italic">
+                Note: Your contact info is not required to receive your settlement estimate.
+              </p>
+            </div>
+          </div>
         </div>
 
         <Quiz />
