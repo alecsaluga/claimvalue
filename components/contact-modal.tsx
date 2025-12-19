@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Dialog,
   DialogContent,
@@ -20,9 +21,12 @@ interface ContactModalProps {
 }
 
 export function ContactModal({ open, onOpenChange }: ContactModalProps) {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState("");
@@ -43,6 +47,12 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
       return;
     }
 
+    // Terms validation
+    if (!agreedToTerms) {
+      setError("Please agree to the terms and conditions");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -55,17 +65,11 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
 
       setIsSuccess(true);
 
-      // Auto-close after 2 seconds
+      // Redirect to confirmation page after brief delay
       setTimeout(() => {
         onOpenChange(false);
-        // Reset form after closing
-        setTimeout(() => {
-          setIsSuccess(false);
-          setName("");
-          setEmail("");
-          setPhone("");
-        }, 300);
-      }, 2000);
+        router.push("/confirmation");
+      }, 1000);
     } catch (err) {
       setError("Failed to submit. Please try again.");
     } finally {
@@ -143,6 +147,28 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
               />
             </div>
 
+            <div className="flex items-start space-x-2">
+              <input
+                type="checkbox"
+                id="terms"
+                checked={agreedToTerms}
+                onChange={(e) => setAgreedToTerms(e.target.checked)}
+                className="mt-1 h-4 w-4 rounded border-gray-300"
+                disabled={isSubmitting}
+              />
+              <label htmlFor="terms" className="text-sm text-muted-foreground leading-relaxed">
+                I agree to the{" "}
+                <button
+                  type="button"
+                  onClick={() => setShowTerms(true)}
+                  className="text-primary underline hover:no-underline"
+                >
+                  terms and conditions
+                </button>
+                {" "}and consent to an attorney reviewing my case and reaching out to me.
+              </label>
+            </div>
+
             {error && (
               <p className="text-sm text-destructive">{error}</p>
             )}
@@ -165,6 +191,44 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
           </form>
         )}
       </DialogContent>
+
+      {/* Terms and Conditions Modal */}
+      <Dialog open={showTerms} onOpenChange={setShowTerms}>
+        <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Terms and Conditions</DialogTitle>
+          </DialogHeader>
+          <div className="prose prose-sm max-w-none">
+            <h3 className="font-semibold text-base mb-2">1. Attorney Review and Contact</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              By submitting your information, you consent to have an attorney or legal professional review your case details and contact you via phone, email, or text message to discuss your potential claim.
+            </p>
+
+            <h3 className="font-semibold text-base mb-2">2. No Attorney-Client Relationship</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Submitting this form does not create an attorney-client relationship. An attorney-client relationship will only be established if you and the attorney enter into a written agreement.
+            </p>
+
+            <h3 className="font-semibold text-base mb-2">3. Case Evaluation</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              The estimate provided is for informational purposes only and does not guarantee any specific outcome or settlement amount. Each case is unique and results may vary.
+            </p>
+
+            <h3 className="font-semibold text-base mb-2">4. Privacy</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Your information will be kept confidential and used solely for the purpose of evaluating and discussing your potential legal claim.
+            </p>
+
+            <h3 className="font-semibold text-base mb-2">5. No Obligation</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              You are under no obligation to hire an attorney as a result of this consultation. You have the right to consult with other attorneys before making a decision.
+            </p>
+          </div>
+          <div className="flex justify-end mt-4">
+            <Button onClick={() => setShowTerms(false)}>Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }

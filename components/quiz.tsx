@@ -399,14 +399,22 @@ function QuestionInput({ question, value, onChange, error }: QuestionInputProps)
   }
 
   if (question.type === "long_text") {
+    const exampleText = "Example: I was the only woman on my team and my manager consistently interrupted me in meetings, dismissed my ideas, and gave credit for my work to male colleagues. This happened weekly for about 6 months.";
+    const showExample = stringValue === "";
+
     return (
-      <div className="space-y-2">
+      <div className="space-y-2 relative">
         <Textarea
           placeholder={question.placeholder || "Share the key details here..."}
           value={stringValue}
           onChange={(e) => onChange(e.target.value)}
           className="min-h-[120px] resize-none rounded-[8px] border-[#e5e7eb] font-[500] tracking-[-0.01em]"
         />
+        {showExample && (
+          <div className="absolute top-3 left-3 right-3 pointer-events-none text-muted-foreground/60 text-sm leading-relaxed">
+            {exampleText}
+          </div>
+        )}
         {error && <p className="text-sm text-destructive mt-3">{error}</p>}
       </div>
     );

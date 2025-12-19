@@ -139,6 +139,7 @@ export const questions: Question[] = [
       "I am pregnant or recently gave birth",
       "I practice a specific religion",
       "I am a military veteran",
+      "I am a minority",
       "I reported safety violations or illegal activity (whistleblower)",
       "None of the above"
     ],
@@ -173,6 +174,7 @@ export const questions: Question[] = [
   {
     id: "employer_size",
     title: "How many employees does the company have?",
+    help: "Best guess is fine",
     type: "choice",
     options: [
       "Under 10",
